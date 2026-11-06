@@ -1,24 +1,29 @@
 // src/pages/Dashboard/index.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { showToast } from '../../utils/toast';
 
 // Components
 import DashboardHeader from '../../components/editor/DashboardHeader';
 import EditorTabs from '../../components/editor/EditorTabs';
 import EditorPlatformContent from '../../components/editor/EditorPlatformContent';
 import EditorAddVideoModal from '../../components/editor/EditorAddVideoModal';
+import ReviewLinkModal from '../../components/editor/ReviewLinkModal';
 
-// Existing tabs
+// Tabs
 import PrivateTab from './PrivateTab';
 import SocialTab from './SocialTab';
+import FeedbackTab from './FeedbackTab';
+import TimestampsTab from './TimestampsTab';
 
 export default function Dashboard() {
     const { user, loading, profile, initialized, signOut } = useAuth();
     const navigate = useNavigate();
 
-    const [activeTab, setActiveTab] = useState('videos');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'videos';
     const [allVideos, setAllVideos] = useState([]);
     const [platforms, setPlatforms] = useState([]);
     const [loadingVideos, setLoadingVideos] = useState(true);
@@ -26,56 +31,7 @@ export default function Dashboard() {
     const [editingVideo, setEditingVideo] = useState(null);
     const [selectedPlatform, setSelectedPlatform] = useState(null);
     const [isPlatformSpecific, setIsPlatformSpecific] = useState(false);
-    // src/pages/Dashboard/index.jsx
-    // ✅ Add this state
-
-    const [heroVideo, setHeroVideo] = useState(null);
-    const [heroVideoUrl, setHeroVideoUrl] = useState('');
-
-    // ✅ Add this function for MOV support
-    const handleHeroVideoUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        if (!file.type.startsWith('video/')) {
-            alert('Please select a video file');
-            return;
-        }
-
-        if (file.size > 100 * 1024 * 1024) {  // 100MB limit
-            alert('Video must be less than 100MB');
-            return;
-        }
-
-        // ✅ Get file extension
-        const fileExt = file.name.split('.').pop().toLowerCase();
-        const allowedExts = ['mov', 'mp4', 'webm', 'avi', 'mkv'];
-        if (!allowedExts.includes(fileExt)) {
-            alert('Please upload a valid video file (MOV, MP4, WEBM, AVI, MKV)');
-            return;
-        }
-
-        try {
-            const fileName = `hero-video.${fileExt}`;
-
-            const { data, error } = await supabase.storage
-                .from('hero-video')
-                .upload(fileName, file, { upsert: true });
-
-            if (error) throw error;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('hero-video')
-                .getPublicUrl(fileName);
-
-            setHeroVideoUrl(publicUrl);
-            alert(`✅ Hero video (${fileExt.toUpperCase()}) uploaded successfully!`);
-
-        } catch (err) {
-            console.error('Upload error:', err);
-            alert('Failed to upload video');
-        }
-    };
+    const [justAddedVideo, setJustAddedVideo] = useState(null);
 
     useEffect(() => {
         if (!loading && initialized && !user) {
@@ -87,7 +43,11 @@ export default function Dashboard() {
         if (user?.id) {
             fetchAllData();
         }
-    }, [user]);
+    }, [user?.id]);
+
+    const setActiveTab = (tabId) => {
+        setSearchParams({ tab: tabId });
+    };
 
     const fetchAllData = async () => {
         setLoadingVideos(true);
@@ -113,30 +73,25 @@ export default function Dashboard() {
         }
     };
 
-    const handleAddVideo = async (form) => {
-        try {
-            const platform = form.platform === 'auto' ? detectPlatform(form.video_url) : form.platform;
-            const { error } = await supabase.from('videos').insert([{
-                user_id: user.id,
-                title: form.title,
-                description: form.description,
-                video_url: form.video_url,
-                platform: platform,
-                is_vip: form.is_vip,
-                is_top_rated: form.is_top_rated,
-            }]);
+    const handleAddVideo = async (form, createdVideo) => {
+        if (editingVideo) {
+            setShowAddModal(false);
+            setEditingVideo(null);
+            setSelectedPlatform(null);
+            setIsPlatformSpecific(false);
+            fetchAllData();
+            return;
+        }
 
-            if (!error) {
-                setShowAddModal(false);
-                fetchAllData();
-            }
-        } catch (err) {
-            console.error('Error adding video:', err);
+        setShowAddModal(false);
+        if (createdVideo) {
+            setJustAddedVideo(createdVideo);
+            setAllVideos(prev => [createdVideo, ...prev]);
         }
     };
 
     const handlePlayVideo = (video) => {
-        navigate(`/video/${video.id}`);
+        showToast('Coming later');
     };
 
     const handleEditVideo = (video) => {
@@ -165,10 +120,22 @@ export default function Dashboard() {
         return 'other';
     };
 
-    // ✅ Tabs - Profile Tab REMOVED
+    const getPlatformIcon = (platform) => {
+        const p = platform?.toLowerCase() || '';
+        if (p === 'youtube') return 'fab fa-youtube';
+        if (p === 'tiktok') return 'fab fa-tiktok';
+        if (p === 'instagram') return 'fab fa-instagram';
+        if (p === 'twitter' || p === 'x') return 'fab fa-twitter';
+        if (p === 'facebook') return 'fab fa-facebook';
+        if (p === 'discord') return 'fab fa-discord';
+        return 'fas fa-video';
+    };
+
+    // ✅ Tabs
     const getTabs = () => {
         const baseTabs = [
             { id: 'videos', label: 'Videos', icon: 'fas fa-video' },
+            { id: 'feedback', label: 'Feedback', icon: 'fas fa-comments' },
             { id: 'private', label: 'Private Storage', icon: 'fas fa-lock' },
             { id: 'social', label: 'Social Links', icon: 'fas fa-share-alt' },
         ];
@@ -180,17 +147,6 @@ export default function Dashboard() {
         }));
 
         return [...baseTabs, ...platformTabs];
-    };
-
-    const getPlatformIcon = (platform) => {
-        const p = platform?.toLowerCase() || '';
-        if (p === 'youtube') return 'fab fa-youtube';
-        if (p === 'tiktok') return 'fab fa-tiktok';
-        if (p === 'instagram') return 'fab fa-instagram';
-        if (p === 'twitter' || p === 'x') return 'fab fa-twitter';
-        if (p === 'facebook') return 'fab fa-facebook';
-        if (p === 'discord') return 'fab fa-discord';
-        return 'fas fa-video';
     };
 
     const renderContent = () => {
@@ -227,6 +183,10 @@ export default function Dashboard() {
                         onDeleteVideo={handleDeleteVideo}
                     />
                 );
+            case 'feedback':
+                return <FeedbackTab />;
+            case 'timestamps':
+                return <TimestampsTab />;
             case 'private':
                 return <PrivateTab />;
             case 'social':
@@ -238,7 +198,7 @@ export default function Dashboard() {
 
     if (loading || !initialized) {
         return (
-            <div className="min-h-screen bg-black pt-20 flex items-center justify-center">
+            <div className="min-h-screen bg-[#0F0F14] pt-20 flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-12 h-12 border-4 border-supabase-green/30 border-t-supabase-green rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-400 text-sm">Loading dashboard...</p>
@@ -252,44 +212,15 @@ export default function Dashboard() {
     const tabs = getTabs();
 
     return (
-        <div>
-
-            {/* ✅ Hero Video Upload */}
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 mt-8">
-                <h3 className="text-white font-semibold text-lg mb-2">Hero Video</h3>
-                <p className="text-gray-400 text-sm mb-4">Upload a video for the landing page hero section.</p>
-                <div className="flex items-center gap-4">
-                    <label className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm transition-all">
-                        <i className="fas fa-upload mr-2"></i>
-                        Upload Video
-                        <input
-                            type="file"
-                            accept="video/*"
-                            className="hidden"
-                            onChange={handleHeroVideoUpload}
-                        />
-                    </label>
-                    {heroVideoUrl && (
-                        <span className="text-supabase-green text-sm">✅ Video uploaded</span>
-                    )}
-                </div>
-                {heroVideoUrl && (
-                    <div className="mt-4">
-                        <video src={heroVideoUrl} controls className="w-full max-w-md rounded-lg border border-white/10" />
-                    </div>
-                )}
-            </div>
-            {/* ✅ New Dashboard Header */}
+        <div className="px-3 md:px-6 md:py-5">
             <DashboardHeader onSignOut={signOut} />
 
-            {/* ✅ Tabs - Profile Tab Removed */}
             <EditorTabs
                 tabs={tabs}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
             />
 
-            {/* Content */}
             {loadingVideos ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     {[1, 2, 3, 4].map(i => (
@@ -300,7 +231,6 @@ export default function Dashboard() {
                 renderContent()
             )}
 
-            {/* Add Video Modal */}
             <EditorAddVideoModal
                 isOpen={showAddModal}
                 onClose={() => {
@@ -314,6 +244,13 @@ export default function Dashboard() {
                 isPlatformSpecific={isPlatformSpecific}
                 editingVideo={editingVideo}
             />
+
+            {justAddedVideo && (
+                <ReviewLinkModal
+                    video={justAddedVideo}
+                    onClose={() => setJustAddedVideo(null)}
+                />
+            )}
         </div>
     );
 }

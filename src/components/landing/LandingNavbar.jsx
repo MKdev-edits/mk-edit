@@ -1,115 +1,175 @@
 // src/components/landing/LandingNavbar.jsx
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
 
-export default function LandingNavbar({ onOpenModal }) {
+export default function LandingNavbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
-    // ✅ Track scroll for glass effect
     useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
-        };
+        const handleScroll = () => setIsScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    useEffect(() => {
+        if (isMobileMenuOpen) document.body.style.overflow = "hidden";
+        else document.body.style.overflow = "";
+        return () => { document.body.style.overflow = ""; };
+    }, [isMobileMenuOpen]);
+
     const navLinks = [
         { id: 'home', label: 'Home', target: 'home' },
         { id: 'features', label: 'Features', target: 'features-section' },
+        { id: 'demo', label: 'Demo', target: 'demo-section' },
         { id: 'purpose', label: 'Purpose', target: 'purpose-section' },
         { id: 'faq', label: 'FAQ', target: 'faq-section' },
     ];
 
     const scrollToSection = (sectionId) => {
         const section = document.getElementById(sectionId);
-        if (section) {
-            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setIsMobileMenuOpen(false);
     };
 
     return (
         <>
-            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-                ? 'bg-black/95 backdrop-blur-xl border-b border-white/10'
-                : 'bg-black/60 backdrop-blur-md border-b border-white/5'
-                }`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16 md:h-20">
-                        {/* ✅ Logo - Left */}
-                        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-xl md:text-2xl font-bold text-white">MK</span>
+            {/* ============ FULL-WIDTH NAVBAR ============ */}
+            <header
+                className={`fixed top-0 left-0 right-0 z-50
+                    transition-all duration-300
+                    ${isScrolled
+                        ? 'bg-[#141419]/85 backdrop-blur-xl border-b border-[var(--glass-border-soft)]'
+                        : 'bg-transparent border-b border-transparent'
+                    }`}
+            >
+                <nav className="max-w-7xl mx-auto flex items-center justify-between
+                    px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4">
+
+                    {/* LEFT — Logo */}
+                    <Link to="/" className="flex items-center gap-2.5">
+                        <span className="relative w-8 h-8 rounded-full overflow-hidden
+    ring-1 ring-[var(--glass-border-soft)]">
+                            <img
+                                src="/images/Main-MK.JPG"
+                                alt="MK"
+                                className="w-full h-full object-cover"
+                            />
+                        </span>
+                        <span className="font-display font-extrabold tracking-tight text-base leading-none text-[var(--fg)]">
+                            MK<span className="text-[var(--color-accent)]">.</span>
+                        </span>
+                    </Link>
+
+                    {/* MIDDLE — Desktop nav links */}
+                    <ul className="hidden lg:flex items-center gap-1">
+                        {navLinks.map((link) => (
+                            <li key={link.id}>
+                                <button
+                                    onClick={() => scrollToSection(link.target)}
+                                    className="relative px-3.5 py-2 text-sm font-medium
+                                        text-[var(--fg-muted)] hover:text-[var(--fg)]
+                                        transition-colors duration-200"
+                                >
+                                    {link.label}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {/* RIGHT — CTA + Mobile menu */}
+                    <div className="flex items-center gap-2">
+                        <Link
+                            to="/login"
+                            className="hidden lg:inline-flex items-center gap-2
+        glass-soft glass-hover
+        px-4 py-2 rounded-full
+        text-sm font-semibold text-[var(--fg)]"
+                        >
+                            Sign In
                         </Link>
 
-                        {/* ✅ Desktop Nav Links - Center */}
-                        <div className="hidden md:flex items-center gap-1 lg:gap-2 absolute left-1/2 -translate-x-1/2">
-                            {navLinks.map((link) => (
+                        <button
+                            aria-label="Menu"
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="lg:hidden glass-soft w-9 h-9 rounded-full flex items-center justify-center
+                                text-[var(--fg)]"
+                        >
+                            <Menu className="w-4 h-4" />
+                        </button>
+                    </div>
+                </nav>
+            </header>
+
+            {/* ============ MOBILE DRAWER — slides from right, full height, half width ============ */}
+            <div
+                aria-hidden={!isMobileMenuOpen}
+                className={`fixed inset-0 z-[60] lg:hidden
+                    transition-opacity duration-200
+                    ${isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+            >
+                {/* Backdrop */}
+                <div
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="absolute inset-0 bg-black/70"
+                />
+
+                {/* Panel — full height, half width, slides from right */}
+                <aside
+                    className={`absolute right-0 top-0 bottom-0
+                        w-1/2 min-w-[240px] max-w-[320px]
+                        bg-black/95 backdrop-blur-2xl
+                        border-l border-[var(--glass-border-soft)]
+                        p-6 flex flex-col
+                        transition-transform duration-300 ease-out
+                        will-change-transform
+                        ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+                >
+                    <div className="flex items-center justify-between mb-8">
+                        <span className="font-display font-extrabold text-lg text-[var(--fg)]">
+                            MK<span className="text-[var(--color-accent)]">.</span>
+                        </span>
+                        <button
+                            aria-label="Close menu"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="glass-soft w-9 h-9 rounded-full flex items-center justify-center
+                                text-[var(--fg)]"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    <ul className="flex flex-col gap-1">
+                        {navLinks.map((link) => (
+                            <li key={link.id}>
                                 <button
-                                    key={link.id}
                                     onClick={() => scrollToSection(link.target)}
-                                    className="px-3 py-2 text-sm font-medium rounded-lg transition-all text-gray-300 hover:text-white hover:bg-white/10"
+                                    className="w-full text-left px-4 py-3 rounded-2xl
+                                        text-[var(--fg)] font-medium
+                                        hover:bg-[var(--glass-bg)]
+                                        transition-colors duration-150"
                                 >
                                     {link.label}
                                 </button>
-                            ))}
-                        </div>
+                            </li>
+                        ))}
+                    </ul>
 
-                        {/* ✅ Desktop Right: CTA Button */}
-                        <div className="hidden md:flex items-center gap-4">
-                            <button
-                                onClick={onOpenModal}
-                                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-all transform hover:scale-105 shadow-lg shadow-blue-500/30 flex items-center gap-2"
-                            >
-                                <span>🚀</span>
-                                Claim Your Free Subdomain
-                            </button>
-                        </div>
-
-                        {/* ✅ Mobile: Music Player + Hamburger */}
-                        <div className="flex items-center gap-2 md:hidden">
-                            <button
-                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
-                            >
-                                <i className={`fas fa-${isMobileMenuOpen ? 'times' : 'bars'} text-xl text-white`}></i>
-                            </button>
-                        </div>
+                    <div className="mt-auto pt-6 border-t border-[var(--glass-border-soft)]">
+                        <Link
+                            to="/login"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="w-full inline-flex items-center justify-center gap-2
+        glass-soft glass-hover
+        px-4 py-3 rounded-2xl
+        text-sm font-semibold text-[var(--fg)]"
+                        >
+                            Sign In
+                        </Link>
                     </div>
-                </div>
-            </nav>
-
-            {/* ✅ Mobile Menu */}
-            {isMobileMenuOpen && (
-                <div className="fixed top-16 left-0 right-0 z-40 md:hidden animate-slide-down">
-                    <div className="bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl">
-                        <div className="px-4 py-6 space-y-1">
-                            {navLinks.map((link) => (
-                                <button
-                                    key={link.id}
-                                    onClick={() => scrollToSection(link.target)}
-                                    className="block w-full text-left text-base font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 text-gray-300 hover:text-white"
-                                >
-                                    {link.label}
-                                </button>
-                            ))}
-                            <div className="pt-4 mt-2 border-t border-white/10">
-                                <button
-                                    onClick={() => {
-                                        setIsMobileMenuOpen(false);
-                                        onOpenModal();
-                                    }}
-                                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full transition-all flex items-center justify-center gap-2"
-                                >
-                                    <span>🚀</span>
-                                    Claim Your Free Subdomain
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+                </aside>
+            </div>
         </>
     );
 }

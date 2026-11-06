@@ -16,22 +16,11 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
     const isLoggedIn = isEditor || isViewer;
 
     const [platforms, setPlatforms] = useState([]);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [timestampsExpanded, setTimestampsExpanded] = useState(false);
-    const [timestampedVideos, setTimestampedVideos] = useState([]);
-    const [loadingTimestamps, setLoadingTimestamps] = useState(false);
 
     // ✅ Fetch platforms
     useEffect(() => {
         fetchPlatforms();
     }, []);
-
-    // ✅ Fetch timestamped videos if logged in
-    useEffect(() => {
-        if (isLoggedIn) {
-            fetchTimestampedVideos();
-        }
-    }, [isLoggedIn]);
 
     const fetchPlatforms = async () => {
         try {
@@ -47,35 +36,6 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
             }
         } catch (err) {
             console.error('Error fetching platforms:', err);
-        }
-    };
-
-    const fetchTimestampedVideos = async () => {
-        setLoadingTimestamps(true);
-        try {
-            // Get videos that have timestamps
-            const { data } = await supabase
-                .from('video_feedback')
-                .select('video_id, videos(title, id)')
-                .eq('client_id', viewer?.id || user?.id)
-                .order('created_at', { ascending: false });
-
-            if (data) {
-                // Get unique videos
-                const uniqueVideos = [];
-                const seenIds = new Set();
-                data.forEach(item => {
-                    if (item.videos && !seenIds.has(item.videos.id)) {
-                        seenIds.add(item.videos.id);
-                        uniqueVideos.push(item.videos);
-                    }
-                });
-                setTimestampedVideos(uniqueVideos);
-            }
-        } catch (err) {
-            console.error('Error fetching timestamped videos:', err);
-        } finally {
-            setLoadingTimestamps(false);
         }
     };
 
@@ -105,28 +65,39 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
     };
 
     const isActive = (path) => {
-        if (path === '/') return location.pathname === '/';
-        return location.pathname.startsWith(path);
+        const [targetPath, targetQuery] = path.split('?');
+        const currentPath = location.pathname;
+        const currentQuery = location.search.replace('?', '');
+
+        // Home: highlight when on /dashboard without a tab, or with tab=videos
+        if (targetPath === '/dashboard' && !targetQuery) {
+            return currentPath === '/dashboard' && (currentQuery === '' || currentQuery === 'tab=videos');
+        }
+
+        // Other links with a tab query
+        if (targetQuery) {
+            return currentPath === targetPath && currentQuery === targetQuery;
+        }
+
+        // Plain paths
+        return currentPath === targetPath;
     };
 
-    // ✅ Build sidebar items
+    // ✅ Sidebar items
     const getSidebarItems = () => {
         const items = [];
 
-        // ✅ Always show for everyone
         items.push(
-            { id: 'home', icon: 'fas fa-home', label: 'Home', path: '/' },
+            { id: 'home', icon: 'fas fa-home', label: 'Home', path: '/dashboard' },
             { id: 'library', icon: 'fas fa-book', label: 'Library', path: '/library' },
         );
 
-        // ✅ Show timestamps for logged-in users
         if (isLoggedIn) {
             items.push({
                 id: 'timestamps',
                 icon: 'far fa-clock',
                 label: 'Timestamps',
-                path: '/timestamps',
-                isDropdown: true,
+                path: '/dashboard?tab=timestamps',
             });
         }
 
@@ -135,18 +106,11 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
 
     const sidebarItems = getSidebarItems();
 
-    // ✅ Handle sign out
     const handleSignOut = async () => {
-        setShowDropdown(false);
         if (isEditor) {
             await signOut();
         }
         navigate('/');
-    };
-
-    // ✅ Toggle timestamps dropdown
-    const toggleTimestamps = () => {
-        setTimestampsExpanded(!timestampsExpanded);
     };
 
     return (
@@ -154,7 +118,7 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
             {/* Mobile overlay */}
             {!isDesktop && isOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
                     onClick={onClose}
                 />
             )}
@@ -162,7 +126,7 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
             <aside
                 className={`
                     fixed top-0 left-0 z-50 h-full
-                    bg-black border-r border-white/10
+                    bg-[#0F0F14] 
                     shadow-2xl flex-shrink-0
                     transition-all duration-300 ease-in-out
                     ${isDesktop ? 'translate-x-0' : ''}
@@ -173,12 +137,11 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
                     ${!isDesktop ? 'w-[280px]' : ''}
                 `}
             >
-                {/* ✅ Sidebar Header */}
+                {/* Sidebar header */}
                 <div className={`flex items-center h-14 px-4
                     ${isDesktop && !isOpen ? 'justify-center px-2' : 'justify-between'}
                 `}>
                     {isDesktop && !isOpen ? (
-                        // ✅ Collapsed: Show only toggle button
                         <div className="flex items-center justify-center w-full gap-2">
                             <button
                                 onClick={onToggle}
@@ -189,10 +152,8 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
                             </button>
                         </div>
                     ) : (
-                        // ✅ Open: Show header with close button
                         <>
                             <div className="flex items-center gap-3">
-                                {/* ✅ Golden Logo */}
                                 <div className="relative w-8 h-5 overflow-hidden rounded-sm">
                                     <div className="w-full h-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 flex items-center justify-center shadow-md shadow-yellow-500/30">
                                         <i className="fas fa-play text-white text-[8px] ml-0.5"></i>
@@ -213,113 +174,43 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
                     )}
                 </div>
 
-                {/* ✅ Sidebar Content - Scrollable */}
-                <div className={`h-[calc(100vh-56px)] overflow-y-auto scrollbar-hide px-2 py-2
+                {/* Sidebar content */}
+                <div className={`h-[calc(100vh-56px)] overflow-y-auto scrollbar-hide py-2
                     ${isDesktop && !isOpen ? 'px-1' : 'px-2'}
                 `}>
-                    {/* ✅ Main Items */}
+                    {/* Main items */}
                     <div className="space-y-0.5">
                         {sidebarItems.map((item) => (
-                            <div key={item.id}>
-                                {item.isDropdown ? (
-                                    // ✅ Timestamps Dropdown
-                                    <div>
-                                        <button
-                                            onClick={toggleTimestamps}
-                                            className={`
-                                                flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all group
-                                                ${isDesktop && !isOpen ? 'justify-center px-2' : ''}
-                                                text-gray-400 hover:text-white hover:bg-white/5
-                                            `}
-                                            title={isDesktop && !isOpen ? item.label : ''}
-                                        >
-                                            <i className={`${item.icon} text-lg w-5 text-center
-                                                ${isDesktop && !isOpen ? 'text-xl' : ''}
-                                            `}></i>
+                            <Link
+                                key={item.id}
+                                to={item.path}
+                                onClick={() => { if (!isDesktop) onClose(); }}
+                                className={`
+                                    flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group
+                                    ${isActive(item.path)
+                                        ? 'bg-white/10 text-white'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    }
+                                    ${isDesktop && !isOpen ? 'justify-center px-2' : ''}
+                                `}
+                                title={isDesktop && !isOpen ? item.label : ''}
+                            >
+                                <i className={`${item.icon} text-lg w-5 text-center
+                                    ${isActive(item.path) ? 'text-supabase-green' : 'group-hover:text-supabase-green'}
+                                    ${isDesktop && !isOpen ? 'text-xl' : ''}
+                                `}></i>
 
-                                            {(!isDesktop || isOpen) && (
-                                                <>
-                                                    <span className="flex-1 text-sm font-medium">{item.label}</span>
-                                                    <i className={`fas fa-chevron-${timestampsExpanded ? 'down' : 'right'} text-gray-500 text-xs transition-transform`}></i>
-                                                </>
-                                            )}
-                                        </button>
-
-                                        {/* ✅ Timestamp Videos List */}
-                                        {timestampsExpanded && (!isDesktop || isOpen) && (
-                                            <div className="mt-1 space-y-0.5 ml-7">
-                                                {loadingTimestamps ? (
-                                                    <p className="text-gray-500 text-xs px-3 py-2">Loading...</p>
-                                                ) : timestampedVideos.length === 0 ? (
-                                                    <p className="text-gray-500 text-xs px-3 py-2">No timestamped videos</p>
-                                                ) : (
-                                                    <>
-                                                        {timestampedVideos.map((video) => (
-                                                            <Link
-                                                                key={video.id}
-                                                                to={`/video/${video.id}`}
-                                                                onClick={() => {
-                                                                    if (!isDesktop) onClose();
-                                                                }}
-                                                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all hover:bg-white/5 text-gray-400 hover:text-white text-sm"
-                                                            >
-                                                                <i className="fas fa-play-circle text-xs text-supabase-green"></i>
-                                                                <span className="truncate">{video.title}</span>
-                                                            </Link>
-                                                        ))}
-
-                                                        {/* ✅ View All Button */}
-                                                        {timestampedVideos.length > 1 && (
-                                                            <Link
-                                                                to="/timestamps"
-                                                                onClick={() => {
-                                                                    if (!isDesktop) onClose();
-                                                                }}
-                                                                className="flex items-center justify-center px-3 py-1.5 mt-1 rounded-lg bg-supabase-green/10 hover:bg-supabase-green/20 text-supabase-green text-xs font-medium transition-all"
-                                                            >
-                                                                View All ({timestampedVideos.length} videos)
-                                                            </Link>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    // ✅ Regular Item
-                                    <Link
-                                        to={item.path}
-                                        onClick={() => {
-                                            if (!isDesktop) onClose();
-                                        }}
-                                        className={`
-                                            flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group
-                                            ${isActive(item.path)
-                                                ? 'bg-white/15 text-white'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                            }
-                                            ${isDesktop && !isOpen ? 'justify-center px-2' : ''}
-                                        `}
-                                        title={isDesktop && !isOpen ? item.label : ''}
-                                    >
-                                        <i className={`${item.icon} text-lg w-5 text-center 
-                                            ${isActive(item.path) ? 'text-supabase-green' : 'group-hover:text-supabase-green'}
-                                            ${isDesktop && !isOpen ? 'text-xl' : ''}
-                                        `}></i>
-
-                                        {(!isDesktop || isOpen) && (
-                                            <span className="flex-1 text-sm font-medium">{item.label}</span>
-                                        )}
-                                    </Link>
+                                {(!isDesktop || isOpen) && (
+                                    <span className="flex-1 text-sm font-medium">{item.label}</span>
                                 )}
-                            </div>
+                            </Link>
                         ))}
                     </div>
 
-                    {/* ✅ Divider */}
+                    {/* Divider */}
                     <div className="h-px bg-white/10 mx-3 my-4"></div>
 
-                    {/* ✅ Platforms List */}
+                    {/* Platforms */}
                     {platforms.length > 0 && (
                         <div className="space-y-0.5">
                             {(!isDesktop || isOpen) && (
@@ -349,11 +240,8 @@ export default function Sidebar({ isOpen, onClose, isDesktop, onToggle }) {
                         </div>
                     )}
 
-                    {/* Bottom Spacer */}
                     <div className="h-4"></div>
                 </div>
-
-
             </aside>
         </>
     );

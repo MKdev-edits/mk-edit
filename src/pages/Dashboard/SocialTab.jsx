@@ -101,8 +101,8 @@ export default function SocialTab() {
 
             {/* Add Social Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg" onClick={() => setShowModal(false)}>
-                    <div className="relative w-full max-w-md bg-black/95 backdrop-blur-2xl rounded-2xl border border-white/20 p-6" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#141419]/80 backdrop-blur-lg" onClick={() => setShowModal(false)}>
+                    <div className="relative w-full max-w-md bg-[#141419]/95 backdrop-blur-2xl rounded-2xl border border-white/20 p-6" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
                             <i className="fas fa-times text-lg"></i>
                         </button>

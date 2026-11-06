@@ -1,0 +1,276 @@
+/* ============================================================
+   APP.CSS — Landing Page Design System
+   Scoped to landing page only. Does NOT affect main app.
+   Inspired by portfolio's liquid glass system.
+   ============================================================ */
+
+
+/* Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Great+Vibes&family=Dancing+Script:wght@400;500;600;700&display=swap");
+
+/* ============================================================
+   LANDING THEME TOKENS
+   All classes prefixed with .landing- to avoid conflicts
+   ============================================================ */
+
+.landing-theme {
+    --font-body: "Inter", system-ui, -apple-system, sans-serif;
+    --font-display: "Poppins", system-ui, sans-serif;
+    --font-mono: "Space Grotesk", ui-monospace, monospace;
+
+    --color-accent: oklch(0.68 0.21 275);
+    --color-accent-2: oklch(0.72 0.20 330);
+    --color-accent-glow: oklch(0.68 0.21 275 / 0.35);
+
+    --radius-glass: 24px;
+    --radius-glass-lg: 32px;
+
+    --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* PURE BLACK — Dark mode default */
+    --bg: #141419;
+    --bg-2: #18181F;
+    --fg: oklch(0.98 0.002 260);
+    --fg-muted: oklch(0.68 0.008 260);
+    --fg-subtle: oklch(0.50 0.01 260);
+
+    --line: rgba(255, 255, 255, 0.08);
+
+    /* Glass */
+    --glass-bg: rgba(18, 18, 22, 0.72);
+    --glass-bg-strong: rgba(18, 18, 22, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-border-soft: rgba(255, 255, 255, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.25);
+    --glass-shadow: rgba(0, 0, 0, 0.6);
+    --glass-shadow-strong: rgba(0, 0, 0, 0.8);
+    --glass-shade: rgba(0, 0, 0, 0.5);
+    --hero-spot: rgba(255, 255, 255, 0.10);
+    --hero-beam: rgba(255, 255, 255, 0.06);
+    --ambient: rgba(120, 110, 255, 0.07);
+
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.landing-theme h1,
+.landing-theme h2,
+.landing-theme h3,
+.landing-theme h4,
+.landing-theme h5,
+.landing-theme h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+/* Global body text */
+.landing-theme body,
+.landing-theme p,
+.landing-theme span,
+.landing-theme button,
+.landing-theme input,
+.landing-theme a {
+    font-family: var(--font-body);
+}
+
+/* ============================================================
+   GLASS SYSTEM
+   ============================================================ */
+
+.landing-theme .glass {
+    position: relative;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+    backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+    border: 1px solid var(--glass-border-soft);
+    border-radius: var(--radius-glass);
+    box-shadow:
+        0 8px 32px var(--glass-shadow),
+        0 2px 8px var(--glass-shadow),
+        inset 0 1px 0 var(--glass-highlight),
+        inset 0 -1px 0 var(--glass-shade);
+    transition:
+        transform 0.4s var(--ease-glass),
+        box-shadow 0.4s var(--ease-glass),
+        background 0.4s var(--ease-glass),
+        border-color 0.4s var(--ease-glass);
+}
+
+.landing-theme .glass-strong {
+    position: relative;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: blur(56px) saturate(200%) brightness(1.08);
+    backdrop-filter: blur(56px) saturate(200%) brightness(1.08);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass);
+    box-shadow:
+        0 12px 48px var(--glass-shadow-strong),
+        0 4px 12px var(--glass-shadow),
+        inset 0 1px 0 var(--glass-highlight),
+        inset 0 -1px 0 var(--glass-shade);
+}
+
+.landing-theme .glass-soft {
+    position: relative;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(24px) saturate(160%) brightness(1.03);
+    backdrop-filter: blur(24px) saturate(160%) brightness(1.03);
+    border: 1px solid var(--glass-border-soft);
+    border-radius: 14px;
+    box-shadow:
+        0 4px 16px var(--glass-shadow),
+        inset 0 1px 0 var(--glass-highlight);
+}
+
+/* Sheen on top */
+.landing-theme .glass::before,
+.landing-theme .glass-strong::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.06) 0%,
+            transparent 50%,
+            transparent 60%,
+            rgba(255, 255, 255, 0.02) 100%);
+    pointer-events: none;
+}
+
+.landing-theme .glass-hover:hover {
+    transform: translateY(-2px);
+    background: var(--glass-bg-strong);
+    border-color: var(--glass-border);
+}
+
+/* ============================================================
+   GRADIENT TEXT
+   ============================================================ */
+
+.landing-theme .text-gradient {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+/* ============================================================
+   SPOTLIGHT / GRID BACKGROUND
+   ============================================================ */
+
+.landing-theme .landing-grid {
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 25%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 25%, transparent 80%);
+}
+
+.landing-theme .landing-spotlight {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.10) 0%, transparent 62%);
+    filter: blur(60px);
+}
+
+/* ============================================================
+   NOISE / GRAIN
+   ============================================================ */
+
+.landing-theme .landing-noise {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ============================================================
+   MARQUEE
+   ============================================================ */
+
+@keyframes landing-marquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.landing-theme .landing-marquee {
+    animation: landing-marquee 60s linear infinite;
+}
+
+/* ============================================================
+   FADE UP
+   ============================================================ */
+
+@keyframes landing-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.landing-theme .fade-up {
+    animation: landing-fade-up 0.5s var(--ease-glass) both;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+.landing-theme ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.landing-theme ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.landing-theme ::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 999px;
+    border: 2px solid var(--bg);
+}
+
+/* ============================================================
+   MOBILE BLUR OPTIMIZATION
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+    .landing-theme .glass,
+    .landing-theme .glass-strong,
+    .landing-theme .glass-soft {
+        -webkit-backdrop-filter: blur(20px) saturate(160%) brightness(1.03);
+        backdrop-filter: blur(20px) saturate(160%) brightness(1.03);
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .landing-theme *,
+    .landing-theme *::before,
+    .landing-theme *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

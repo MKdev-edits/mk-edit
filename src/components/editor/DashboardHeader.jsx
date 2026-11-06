@@ -80,7 +80,7 @@ export default function DashboardHeader({ onSignOut }) {
 
     return (
         <>
-            <div className="flex items-start gap-4 mb-8 pt-4 pb-2 flex-wrap">
+            <div className="flex items-start gap-4 bg-[#0F0F14] mb-8 pb-2 flex-wrap">
                 {/* ✅ Profile Icon - Left */}
                 <div className="flex-shrink-0">
                     <ProfileImageUpload
@@ -94,9 +94,9 @@ export default function DashboardHeader({ onSignOut }) {
                     />
 
                     <div
-                        className="relative w-20 h-20 md:w-40 md:h-40 rounded-full overflow-hidden cursor-pointer group border-2 border-supabase-green/50 hover:border-supabase-green transition-all"
+                        className="relative w-20 h-20 md:w-30 md:h-30 rounded-full overflow-hidden cursor-pointer group border-2 border-supabase-green/50 hover:border-supabase-green transition-all"
                         style={palette ? {
-                            boxShadow: `0 0 30px ${palette.main}, 0 0 60px ${palette.dark}`,
+                            boxShadow: `0 0 10px ${palette.main}, 0 0 30px ${palette.dark}`,
                         } : {}}
                         onClick={handleProfileImageClick}
                     >
@@ -128,53 +128,23 @@ export default function DashboardHeader({ onSignOut }) {
                             <h1 className="text-xl md:text-2xl font-bold text-white">
                                 {profile?.name || 'Editor'}
                             </h1>
-
-                            {/* ✅ Stats Row */}
-                            <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-gray-400">
-                                <span className="flex items-center gap-1">
-                                    <i className="fas fa-video text-supabase-green text-xs"></i>
-                                    <span>{loading ? '...' : formatNumber(stats.videos)}</span>
-                                    <span className="text-xs text-gray-500">videos</span>
-                                </span>
-                                <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                                <span className="flex items-center gap-1">
-                                    <i className="fas fa-heart text-red-400 text-xs"></i>
-                                    <span>{loading ? '...' : formatNumber(stats.likes)}</span>
-                                    <span className="text-xs text-gray-500">likes</span>
-                                </span>
-                                <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                                <span className="flex items-center gap-1">
-                                    <i className="fas fa-users text-blue-400 text-xs"></i>
-                                    <span>{loading ? '...' : formatNumber(stats.followers)}</span>
-                                    <span className="text-xs text-gray-500">followers</span>
-                                </span>
-                            </div>
                         </div>
 
                         {/* ✅ Sign Out - Top Right */}
                         <button
                             onClick={onSignOut}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition-all text-xs flex-shrink-0"
+                            className="flex items-center md:gap-2 px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-lg transition-all text-xs flex-shrink-0"
                         >
                             <i className="fas fa-sign-out-alt"></i> Sign Out
                         </button>
                     </div>
 
                     {/* ✅ Buttons Row */}
-                    <div className="flex flex-wrap gap-2 mt-3">
-                        {/* Customise Platform - Disabled */}
-                        <button
-                            disabled
-                            className="flex items-center gap-2 px-3 py-1.5 bg-white/5 text-gray-400 rounded-lg text-xs cursor-not-allowed opacity-60"
-                        >
-                            <i className="fas fa-paint-brush text-supabase-green text-xs"></i>
-                            Customise Platform
-                        </button>
-
+                    <div className="flex flex-wrap mt-3">
                         {/* Edit Profile */}
                         <button
                             onClick={() => setShowEditModal(true)}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white rounded-lg text-xs transition-all"
+                            className="flex items-center md:gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white rounded-lg text-xs transition-all"
                         >
                             <i className="fas fa-user-edit text-supabase-green text-xs"></i>
                             Edit Profile

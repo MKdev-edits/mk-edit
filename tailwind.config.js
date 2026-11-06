@@ -4,9 +4,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        'supabase-green': '#0D9488',
+        // ============================================================
+        // BRAND — new canonical names. Use these going forward.
+        // ============================================================
+        brand: {
+          DEFAULT: "#8b5cf6",       // primary accent (matches oklch(0.68 0.21 275))
+          muted: "#7c3aed",         // deeper hover state
+          soft: "rgba(139, 92, 246, 0.15)",  // for badge/tint backgrounds
+          glow: "rgba(139, 92, 246, 0.35)",  // for glows
+        },
+
+        // ============================================================
+        // LEGACY ALIASES
+        // Same violet values, so existing classes keep working without
+        // touching a single component. Delete these once you've renamed
+        // every usage to `brand`.
+        // ============================================================
+        'supabase-green': '#8b5cf6',
         'supabase-dark': '#0A0A0A',
       },
+
+      fontFamily: {
+        display: ['"Poppins"', 'system-ui', 'sans-serif'],
+        body: ['"Inter"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"Space Grotesk"', 'ui-monospace', 'monospace'],
+      },
+
       animation: {
         'slide-in-right': 'slideInRight 0.3s ease-out',
         'slide-out-right': 'slideOutRight 0.3s ease-out',

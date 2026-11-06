@@ -11,15 +11,17 @@ export default function EditorVideoGrid({
 
     if (videoList.length === 0) {
         return (
-            <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
-                <i className="fas fa-video text-4xl text-gray-500 mb-3 block"></i>
+            <div className="bg-white/5 rounded-2xl p-12 text-center border border-white/10">
+                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                    <i className="fas fa-video text-2xl text-gray-500"></i>
+                </div>
                 <p className="text-gray-400 text-sm">No videos here yet</p>
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-6 md:gap-x-4 md:gap-y-6">
             {videoList.map((video) => (
                 <EditorVideoCard
                     key={video.id}

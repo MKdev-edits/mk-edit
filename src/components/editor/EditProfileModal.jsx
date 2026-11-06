@@ -8,7 +8,6 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess }) {
         name: '',
         tagline: '',
         about: '',
-        profile_image: '',
     });
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState('');
@@ -71,8 +70,8 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess }) {
 
                 {message && (
                     <div className={`p-3 rounded-xl text-sm mb-4 ${message.includes('✅')
-                            ? 'bg-supabase-green/20 text-supabase-green border border-supabase-green/30'
-                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        ? 'bg-supabase-green/20 text-supabase-green border border-supabase-green/30'
+                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
                         }`}>
                         {message}
                     </div>
@@ -119,30 +118,6 @@ export default function EditProfileModal({ isOpen, onClose, onSuccess }) {
                             placeholder="Tell your audience about yourself..."
                             className="w-full px-4 py-2 bg-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-supabase-green border border-white/20 resize-none"
                         />
-                    </div>
-
-                    {/* Profile Image URL */}
-                    <div>
-                        <label className="text-gray-400 text-sm flex items-center gap-2 mb-1">
-                            <i className="fas fa-image text-xs"></i> Profile Image URL
-                        </label>
-                        <input
-                            type="url"
-                            value={form.profile_image}
-                            onChange={(e) => setForm({ ...form, profile_image: e.target.value })}
-                            placeholder="https://example.com/your-image.jpg"
-                            className="w-full px-4 py-2 bg-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-supabase-green border border-white/20"
-                        />
-                        {form.profile_image && (
-                            <div className="mt-2">
-                                <img
-                                    src={form.profile_image}
-                                    alt="Preview"
-                                    className="w-12 h-12 rounded-full object-cover border border-supabase-green/50"
-                                    onError={(e) => e.target.style.display = 'none'}
-                                />
-                            </div>
-                        )}
                     </div>
 
                     {/* Submit Button */}

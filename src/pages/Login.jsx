@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { Link } from 'react-router-dom';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -100,15 +101,15 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="min-h-screen bg-[#141419] flex items-center justify-center">
             <div className="relative w-full max-w-md p-6">
                 <div className="absolute inset-0 bg-gradient-to-br from-supabase-green/10 via-black to-emerald-500/10 rounded-3xl blur-3xl" />
-                <div className="relative bg-black/60 backdrop-blur-2xl rounded-2xl border border-white/20 p-8 shadow-2xl">
+                <div className="relative bg-[#141419]/60 backdrop-blur-2xl rounded-2xl border border-white/20 p-8 shadow-2xl">
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-supabase-green to-emerald-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-supabase-green/25">
                             <span className="text-white font-bold text-2xl">E</span>
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-1">Editor Login</h1>
+                        <h1 className="text-2xl font-bold text-white mb-1">Editor's Login</h1>
                         <p className="text-gray-400 text-sm">Sign in to manage your video portfolio</p>
                     </div>
                     {error && <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm">{error}</div>}
@@ -137,6 +138,15 @@ export default function Login() {
                         <button onClick={() => setResetMode(true)} className="text-gray-500 hover:text-supabase-green text-sm transition-colors">
                             Forgot password?
                         </button>
+                    </div>
+                    <div className="mt-3 text-center">
+                        <span className="text-gray-500 text-sm">Don't have an account? </span>
+                        <Link
+                            to="/signup"
+                            className="text-supabase-green hover:underline text-sm font-medium"
+                        >
+                            Sign up
+                        </Link>
                     </div>
                 </div>
             </div>

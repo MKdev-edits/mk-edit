@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useViewerAuth } from '../../contexts/ViewerAuthContext';
 import { supabase } from '../../lib/supabase';
+import { showToast } from '../../utils/toast';
 import SearchBar from './SearchBar';
 import Line2Nav from './Line2Nav';  // ✅ IMPORT Line2Nav
 
@@ -67,8 +68,8 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen, isDesktop, isEd
             {/* ✅ LINE 1: Navbar */}
             <nav
                 className={`
-                    fixed top-0 left-0 right-0 z-[60] bg-black/90 backdrop-blur-xl
-                    transition-all duration-300 ease-in-out
+                    fixed top-0 left-0 right-0 z-[60] bg-[#0F0F14]/70 backdrop-blur-xl
+                    transition-all duration-300 ease-in-out 
                     ${getNavMargin()}
                 `}
             >
@@ -85,12 +86,12 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen, isDesktop, isEd
                             className="flex items-center gap-1.5 group cursor-pointer"
                         >
                             <img
-                                src="/images/MK.JPG"
+                                src="/images/Main-MK.JPG"
                                 alt="Kelvin"
                                 className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-white/10"
                             />
                             <span className="text-white font-medium text-lg md:text-xl tracking-wide">
-                                Kelvin
+                                MK
                             </span>
                         </button>
                     </div>

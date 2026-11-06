@@ -14,9 +14,9 @@ export default function EditorTabs({ tabs, activeTab, onTabChange }) {
                 <button
                     key={tab.id}
                     onClick={() => onTabChange(tab.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition-all text-xs whitespace-nowrap ${activeTab === tab.id
-                            ? 'bg-supabase-green text-white shadow-lg shadow-supabase-green/25'
-                            : 'text-gray-400 hover:text-white hover:bg-white/10'
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition-all md:text-sm text-[12px] whitespace-nowrap ${activeTab === tab.id
+                        ? 'bg-supabase-green text-white shadow-lg shadow-supabase-green/25'
+                        : 'text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                 >
                     <i className={`${tab.icon} text-xs`}></i>

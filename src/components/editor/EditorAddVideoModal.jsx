@@ -27,6 +27,11 @@ export default function EditorAddVideoModal({
     const fileInputRef = useRef(null);
 
     useEffect(() => {
+        setLoading(false);
+        setUploading(false);
+    }, [isOpen]);
+
+    useEffect(() => {
         if (editingVideo) {
             setForm({
                 title: editingVideo.title || '',
@@ -103,55 +108,61 @@ export default function EditorAddVideoModal({
 
         setLoading(true);
 
-        let platform = form.platform === 'auto' ? detectPlatform(form.video_url) : form.platform;
+        try {
+            let platform = form.platform === 'auto' ? detectPlatform(form.video_url) : form.platform;
 
-        // ✅ If editing, handle thumbnail
-        if (editingVideo) {
-            let thumbnail_url = editingVideo.thumbnail_url || '';
+            if (editingVideo) {
+                let thumbnail_url = editingVideo.thumbnail_url || '';
 
-            // ✅ If new thumbnail uploaded, upload it
-            if (thumbnailFile) {
-                const uploadedUrl = await uploadThumbnail(editingVideo.id);
-                if (uploadedUrl) {
-                    thumbnail_url = uploadedUrl;
+                if (thumbnailFile) {
+                    const uploadedUrl = await uploadThumbnail(editingVideo.id);
+                    if (uploadedUrl) {
+                        thumbnail_url = uploadedUrl;
+                    }
                 }
-            }
 
-            const { error } = await supabase
-                .from('videos')
-                .update({
-                    title: form.title,
-                    description: form.description,
-                    video_url: form.video_url,
-                    thumbnail_url: thumbnail_url,
-                    platform: platform,
-                    is_vip: form.is_vip,
-                    is_top_rated: form.is_top_rated
-                })
-                .eq('id', editingVideo.id);
+                const { error } = await supabase
+                    .from('videos')
+                    .update({
+                        title: form.title,
+                        description: form.description,
+                        video_url: form.video_url,
+                        thumbnail_url: thumbnail_url,
+                        platform: platform,
+                        is_vip: form.is_vip,
+                        is_top_rated: form.is_top_rated
+                    })
+                    .eq('id', editingVideo.id);
 
-            if (!error) {
+                if (error) {
+                    console.error('Edit failed:', error);
+                    alert('Failed to save changes: ' + error.message);
+                    return;   // ← loading stays true, but finally will reset
+                }
+
                 onClose();
-                onSubmit(form);
-            }
-        } else {
-            // ✅ Add new video
-            const { data: newVideo, error: insertError } = await supabase
-                .from('videos')
-                .insert([{
-                    user_id: user.id,
-                    title: form.title,
-                    description: form.description,
-                    video_url: form.video_url,
-                    platform: platform,
-                    is_vip: form.is_vip,
-                    is_top_rated: form.is_top_rated,
-                }])
-                .select()
-                .single();
+                onSubmit(form, null);
+            } else {
+                const { data: newVideo, error: insertError } = await supabase
+                    .from('videos')
+                    .insert([{
+                        user_id: user.id,
+                        title: form.title,
+                        description: form.description,
+                        video_url: form.video_url,
+                        platform: platform,
+                        is_vip: form.is_vip,
+                        is_top_rated: form.is_top_rated,
+                    }])
+                    .select()
+                    .single();
 
-            if (!insertError && newVideo) {
-                // ✅ If thumbnail uploaded, upload it
+                if (insertError) {
+                    console.error('Insert failed:', insertError);
+                    alert('Failed to add video: ' + insertError.message);
+                    return;
+                }
+
                 if (thumbnailFile) {
                     const uploadedUrl = await uploadThumbnail(newVideo.id);
                     if (uploadedUrl) {
@@ -159,14 +170,19 @@ export default function EditorAddVideoModal({
                             .from('videos')
                             .update({ thumbnail_url: uploadedUrl })
                             .eq('id', newVideo.id);
+                        newVideo.thumbnail_url = uploadedUrl;
                     }
                 }
-                onClose();
-                onSubmit(form);
-            }
-        }
 
-        setLoading(false);
+                onClose();
+                onSubmit(form, newVideo);
+            }
+        } catch (err) {
+            console.error('Submit error:', err);
+            alert('Something went wrong: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const detectPlatform = (url) => {
@@ -210,7 +226,7 @@ export default function EditorAddVideoModal({
                     <i className="fas fa-times text-lg"></i>
                 </button>
 
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-md font-bold text-white mb-4 flex items-center gap-2">
                     <i className={`fas ${editingVideo ? 'fa-edit' : 'fa-plus'} text-supabase-green`}></i>
                     {editingVideo ? 'Edit' : 'Add'} {isPlatformSpecific ? platform : ''} Video
                 </h2>

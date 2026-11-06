@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useViewerAuth } from '../../contexts/ViewerAuthContext';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
-import MobileBottomNav from './MobileBottomNav';
+//import MobileBottomNav from './MobileBottomNav';
 import { PlayerProvider } from '../../contexts/PlayerContext';
 
 export default function Layout() {
@@ -18,7 +18,7 @@ export default function Layout() {
     const isSearchPage = location.pathname === '/search';
     const isAuthPage = ['/login', '/viewer-login', '/viewer-signup', '/update-password'].includes(location.pathname);
 
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
     const isDashboard = location.pathname.startsWith('/dashboard');
 
@@ -32,6 +32,9 @@ export default function Layout() {
                 setIsSidebarOpen(false);
             }
         };
+
+        handleResize();   // ← run once on mount
+
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -50,7 +53,7 @@ export default function Layout() {
 
     return (
         <PlayerProvider>
-            <div className={`min-h-screen bg-black ${isDashboard ? 'pt-0 md:pt-0' : ''} pt-0 pb-24 md:pt-2 md:pb-4`}>
+            <div className={`min-h-screen bg-[#0F0F14] ${isDashboard ? 'pt-0 md:pt-0' : ''} pt-0 pb-24 md:pt-2 md:pb-4`}>
                 {/* Navbar */}
                 <Navbar
                     onToggleSidebar={toggleSidebar}
@@ -77,7 +80,7 @@ export default function Layout() {
                 </main>
 
                 {/* Mobile Bottom Nav */}
-                {!isDesktop && <MobileBottomNav />}
+                {/*{!isDesktop && <MobileBottomNav />}*/}
             </div>
         </PlayerProvider>
     );
